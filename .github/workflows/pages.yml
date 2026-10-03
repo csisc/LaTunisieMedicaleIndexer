@@ -32,6 +32,7 @@ jobs:
         env:
           VITE_BASE: /${{ github.event.repository.name }}/
           VITE_API_BASE: ${{ vars.API_BASE_URL }}
+      - run: cp backend/data/articles.csv dist/articles.csv # the queue, read directly when there is no backend
       - run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
