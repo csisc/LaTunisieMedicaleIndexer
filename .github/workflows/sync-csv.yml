@@ -1,5 +1,5 @@
-# Removes from backend/data/articles.csv the pages that already exist on Wikidata, and commits the result.
-# Works even without any server: the CSV lives in the repository.
+# Removes from backend/data/articles.csv the pages that already exist on Wikidata, commits the result,
+# then triggers a new deployment so the site serves the updated queue.
 name: Sync work queue with Wikidata
 
 on:
@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  actions: write # needed to trigger the Pages deployment
 
 jobs:
   sync:
@@ -21,6 +22,8 @@ jobs:
       # The sync script only uses Node built-ins, so no project install is needed
       - run: npx --yes tsx backend/scripts/sync.ts
       - name: Commit changes
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           if git diff --quiet -- backend/data; then echo "Nothing to remove"; exit 0; fi
           git config user.name "github-actions[bot]"
@@ -28,3 +31,5 @@ jobs:
           git add backend/data
           git commit -m "Sync work queue: remove pages already on Wikidata"
           git push
+          # pushes made with GITHUB_TOKEN do not trigger other workflows: redeploy the site explicitly
+          gh workflow run pages.yml --ref "${GITHUB_REF_NAME}"
