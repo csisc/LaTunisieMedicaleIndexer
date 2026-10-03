@@ -1,0 +1,7 @@
+node_modules
+dist
+.env*
+public/ocr/worker.min.js
+public/ocr/tesseract-core*
+public/articles.csv
+public/created_log.csv
