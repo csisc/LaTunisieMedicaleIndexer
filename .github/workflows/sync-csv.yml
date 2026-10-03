@@ -9,7 +9,12 @@ on:
 
 permissions:
   contents: write
-  actions: write # needed to trigger the Pages deployment
+  actions: write
+
+# never run together with the other jobs that commit to the repository
+concurrency:
+  group: repo-data
+  cancel-in-progress: false
 
 jobs:
   sync:
@@ -30,6 +35,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add backend/data
           git commit -m "Sync work queue: remove pages already on Wikidata"
-          git push
+          for i in 1 2 3; do git pull --rebase -X theirs && git push && break; sleep 5; done
           # pushes made with GITHUB_TOKEN do not trigger other workflows: redeploy the site explicitly
           gh workflow run pages.yml --ref "${GITHUB_REF_NAME}"
