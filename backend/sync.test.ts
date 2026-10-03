@@ -74,7 +74,7 @@ test('created pages are removed, logged, and the rest kept', async () => {
 
 test('mark-created removes a single page', () => {
   const it = store.list({ collection: 'before_1956', limit: 1 }).items[0];
-  assert.equal(store.remove([{ keyOrUrl: it.url, qid: 'Q9' }], 'marked created by user').length, 1);
+  assert.equal(store.remove([{ keyOrUrl: it.url, qids: ['Q9'] }], 'marked created by user').length, 1);
   assert.equal(store.findByUrl(it.url), null);
 });
 
