@@ -1,6 +1,0 @@
-{
-  "name": "La Tunisie Médicale - Wikidata Indexing & OCR Tool",
-  "description": "Interactive search, filter, OCR extraction, offline LLM metadata parsing, human verification, and QuickStatements export for digitized articles of La Tunisie Médicale.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
