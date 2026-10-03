@@ -39,32 +39,21 @@ export const AuthorReconcileModal: React.FC<AuthorReconcileModalProps> = ({
     setHasSearched(true);
 
     try {
-      // First try local proxy endpoint
-      const response = await fetch(`/api/wikidata-search?q=${encodeURIComponent(query)}&lang=fr&type=item`);
-      if (response.ok) {
-        const data = await response.json();
-        const searchItems = (data.search || []).map((item: any) => ({
+      // Wikidata's API allows cross-origin calls (origin=*), so the browser queries it directly
+      const url = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(
+        query
+      )}&language=fr&uselang=fr&type=item&limit=8&format=json&origin=*`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Wikidata HTTP ${res.status}`);
+      const data = await res.json();
+      setResults(
+        (data.search || []).map((item: any) => ({
           id: item.id,
           label: item.label,
           description: item.description,
           url: `https://www.wikidata.org/wiki/${item.id}`,
-        }));
-        setResults(searchItems);
-      } else {
-        // Direct Wikidata API fallback with origin=* for CORS
-        const directUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(
-          query
-        )}&language=fr&limit=8&format=json&origin=*`;
-        const res2 = await fetch(directUrl);
-        const data2 = await res2.json();
-        const items2 = (data2.search || []).map((item: any) => ({
-          id: item.id,
-          label: item.label,
-          description: item.description,
-          url: `https://www.wikidata.org/wiki/${item.id}`,
-        }));
-        setResults(items2);
-      }
+        }))
+      );
     } catch (err: any) {
       console.warn('Search error:', err);
       // Fallback pre-programmed prominent Tunisian medical figures
