@@ -1,0 +1,46 @@
+T. 56 — N° 6 — Nov.-Déc. 1978 515
+pd 11
+L'Apport de la Tomodensitométrie Crânio-Cérébrale dans le diagnostic
+des affections Intracrâniennes
+DES
+M. MARZOUKI, A. WACKENHEIM
+Devant une symptomatologie clinique déter- PRINCIPE ET DESCRIPTION
+minée, le problème neurologique et neuroradiolo-
+gique est double. Il s'agit de déterminer le niveau Découverte par Hounsfield en 1972 en Angle-
+lésionnel et de mettre en évidence le facteur terre, et fruit des recherches complexes, en ma-
+étiologique en cause. Si la clinique est suffisante thématiques, informatique, radio-astronomie, la
+en général pour répondre à la première question, tomodensitométrie fut appliquée en médecine pour
+il est par contre plus difficile de répondre à la la première fois par Ambrose en 1973. Basée
+seconde qui revient dans un premier temps à la sur le principe de l'illustration des densités des f
+neuroradiologie. substances de la matière vivante, elle dépend
+Pour rechercher la nature de la lésion, nous de . peer : un système C déses, 6
+disposions jusqu’à présent de nombreux examens système ce traitement et un système de restitu-
+neuroradiologiques tels que l’angiographie, l'en- tion de l'image.
+céphalographie gazeuse fractionnée (E.G.F.), la
+scintigraphie cérébrale, etc. Certes ces exa-
+mens sont précieux, mais certains comme FR G- LE SYSTEME DE MESURE
+F., ne sont pas dépourvus de désagrément pour
+le malade, et sont, bien qu’exceptionnellement, Il comprend une source de rayons X d’une
+sources d'incidents liés à la vulnérabilité de ces grande stabilité de débit. Les doses reçues par |
+malades. les malades sont comparables à celies d’une toms-
+“Aujourd’hui nous avons à notre disposition graphie conventionnelle et le diaphragmage CE
+. ; IE ; ; ; goureux, limite beaucoup la zone irradiée. L’or-
+une technique tout à fait révolutionnaire : la ... n ; ; ; Ç
+tomodensitométrie crânio-cérébrale. Par son ca- Sane @ és dygaadies ci sr € sue sa
+: ; . Te EE interposé entre la source et un détecteur qui est
+ractère atraumatique soninnocuité, sa fiabilité, ‘ 4 Le nes Te
+; x 1 a. un cristal à scintillations avec photomultiplica-
+cette technique est appelée à jouer dans l’avenir ; >
+_, 4e res : A teur et qui transforme l'énergie lumineuse des
+un rô'e considérable dans le diagnostic précoce ‘ ps î ;
+
+. , ; ( ir : photons en énergie électrique (électrons). Le
+et facile d'’affections intracräniennes les plus di- ; 0. ; -
+Le foyer et le détecteur solidaires subissent, à cha-
+
+dec que instant, de part et d'autre de l’objet à ra-
+Avant de présenter quelques observations diographier, un double mouvement de rotation et
+particulièrement démonstratives dans le domaine de translation, permettant ainsi un balayage
+des atteintes vasculaires tumorales, infectieuses complet sous toutes les incidences. Le détecteur
+traumatiques et malformatives, disons quelques recueille ainsi les variations du faisceau inci-
+mots sur l'appareil lui-même. dent à la sortie du crâne après la traversée

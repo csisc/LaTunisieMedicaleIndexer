@@ -1,0 +1,51 @@
+MISE AU POINT
+LA VALEUR DIAGNOSTIQUE DES EXAMENS
+MEDICAUX : VALIDITE INTERNE ET PREDICTIVE
+A. BEN HAMIDA*, S. M'RAD**, L. BEN HAMIDA***, N. ACHOUR",
+B. ZOUARI*, T. NACEF*
+* Département de Médecine Preventive — Faculté de Médecine de Tunis —
+** Service de Médecine Interne — Hôpital La Marsa —
+*** Service de cardiologie — Hôpital Charles Nicolle — Tunis.
+INTRODUCTION : 1) Mesure de la validité interne
+La valeur diagnostique d’un signe clinique ou d’un“ Position du problème :
+examen complèmentaire se pose pour le médecin La valeur d’un test dépend principalement de son
+dans plusieurs circonstances : aptitude différencier les sujets malades des sujets
+— Dans certains cas, il s’agit de choisir l’examen à non-malades. Ceci signifique qu’il existe en théorie
+Ë visée diagnostique «le plus fiable» pour un patient UN€ distinction nette entre malade et non malade par
+souffrant d’une affection donnée. une mesure de référence.
+— Dans d’autres cas, le radiologue ou imageur, le Cette condition est surtout remplie pour les varia-
+g 8 pue p
+biologiste ou le clinicien est soucieux de dévelop- bles” physiologiques qualitatives qui ne peuvent
+per les indications diagnostiques d’un examen prendre que 2 états distincts (méningite/pas de
+nouveau. méningite, cancer/pas de cancer …). Dans le cas des
+— Ailleurs, l’enseignant de sémiologie a le souci Variables quantitatives continues (glycémie, hémo-
+d’une certaine. rigueur (fréquence d’un signe globine…), la distinction entre valeur normale et
+dans une certaine maladie) surtout en cas d’ensei- Valeur pathologique est plus complexe comme nous
+gnement médical assisté par ordinateur (5). le verrons lorsque l’on discutera du «seuil de positi-
+“ . ; J vité».
+La première circonstance est de loin la plus fré-
+quente et plusieurs publications sont consacrées à la + Sensibilité et spécificité :
+valeur de tel ou tel examen dans le diagnostic de dif- La sensibilité et la spécificité d’un test témoignent
+férentes affections (4, 9). En effet les techniques dia- de sa capacité à être positif en cas de maladie et
+, gnostique sont de plus en plus nombreuses, plus OU _ n’être positif que si la maladie est présente (12).
+Do sophistiquées S. leur got Bat souven ous — La sensibilté est donc la capacité du test à don-
+Par ailleurs, certaines deviennent obsolètes devant P _- ; Ë
+l às technologi ] tiè e besadi ner un résultat positif lorsque la maladie est pré-
+€ progres a jee OBIQUE €N a made sente. C’est donc la probabilité qu’un sujet
+tions diagnostiques peuvent évoluer. ; 8
+malade soit positif au test.
+C’est dire l’intérêt de la connaissance de la valeur — La spécificité quant à elle est définie par la capa-
+diagnostique ces ape = La lecture sie des cité du test à donner un résultat négatif lorsque la
+chiffres de sensibilité spécificité et valeurs prediour maladie est absente. C’est donc la probabilité |
+ves parfois pau Car ge réalité, la valeur d’un qu’un sujet non-malade soit négatif au test.
+test ou d’un signe est déterminé par sa valeur propre P 2 = J
+(validité interne) mais aussi par les conditions dans 1 TOGSUTE a par Pin US a
+lesquelles il est effectué (validité externe) échantillon de sujets malades et un échantillon de
+; j EE sujets non-malades sur la base d’un test de réfé-
+Dans ce premier article, la validité interne et la rence |
+validité prédictive seront examinés en rappelant les Ë à ei deréte
+difinitions de base puis en discutant certaines situa- Pas TL Pa = Es gO a
+tions pratiques. est l'examen anatomo-pathologique, alors que pour |
+une maladie infectieuse telle que la Tuberculose |
+* Les termes «signes» et «test» seront employé dans un sens c’est la culture de B.K, etc… Par la suite on soumet |
+équivalent du point de vue méthodologique. d’une part les malades (M+) au test, puis les non- |
