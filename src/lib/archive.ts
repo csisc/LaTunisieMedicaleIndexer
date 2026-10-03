@@ -26,6 +26,23 @@ const loadIndex = () =>
 
 const norm = (v: string) => v.replace(/\+/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
 
+/** Folder name of a volume in public/ocr-text/ (same rule as scripts/ocr-batch.mjs). */
+export const volumeSlug = (v: string) =>
+  norm(v).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+/** OCR text pre-computed by the CI for this page, or null if it has not been processed yet. */
+export async function fetchPrecomputedOcr(volume: string, page: number): Promise<string | null> {
+  try {
+    const r = await fetch(assetUrl(`ocr-text/${volumeSlug(volume)}/${page}.txt`));
+    if (!r.ok) return null;
+    const t = await r.text();
+    // GitHub Pages' 404 fallback is an HTML page: never mistake it for OCR text
+    return /^\s*<!doctype html|^\s*<html/i.test(t) ? null : t;
+  } catch {
+    return null;
+  }
+}
+
 export function parseReaderUrl(url: string): { volume: string; page: number } | null {
   const vol = url.match(/Lecteur_des_archives\/([^#/?]+)/i);
   const page = url.match(/#page\/(\d+)/i);
@@ -72,8 +89,8 @@ export async function resolveArchivePage(url: string): Promise<ResolvedPage> {
 export class ScanNotReadableError extends Error {
   constructor(public imageUrl: string) {
     super(
-      "Le navigateur n'a pas le droit de lire cette image (les Archives nationales n'autorisent pas la lecture depuis un autre site). " +
-        "Enregistrez le scan (clic droit sur l'image → Enregistrer), puis importez-le avec « Scan image », glissez-le ici ou collez-le (Ctrl+V).",
+      "Cette page n'a pas encore été traitée par l'OCR automatique, et le navigateur n'a pas le droit de lire l'image (les Archives nationales ne l'autorisent pas). " +
+        "Patientez jusqu'au prochain passage de l'action « OCR batch », ou enregistrez le scan (clic droit → Enregistrer) puis importez-le avec « Scan image », glissez-le ici ou collez-le (Ctrl+V).",
     );
   }
 }
