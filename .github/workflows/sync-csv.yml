@@ -18,8 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-audit --no-fund tsx
-      - run: npx tsx backend/scripts/sync.ts
+      # The sync script only uses Node built-ins, so no project install is needed
+      - run: npx --yes tsx backend/scripts/sync.ts
       - name: Commit changes
         run: |
           if git diff --quiet -- backend/data; then echo "Nothing to remove"; exit 0; fi
