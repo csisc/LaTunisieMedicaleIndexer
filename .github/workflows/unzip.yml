@@ -1,14 +1,13 @@
-name: Extract Project
+name: Unzip Project
 
 on:
   workflow_dispatch:
 
 permissions:
   contents: write
-  workflows: write
 
 jobs:
-  extract:
+  unzip:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,13 +16,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Extract project
+      - name: Extract ZIP
         shell: bash
         run: |
           set -e
 
           ZIP_FILE="LaTunisieMedicaleIndexer-fixed.zip"
           EXTRACT_DIR="_extracted"
+          PROJECT_DIR="$EXTRACT_DIR/LaTunisieMedicaleIndexer-main"
 
           if [ ! -f "$ZIP_FILE" ]; then
             echo "ERROR: $ZIP_FILE not found."
@@ -34,25 +34,27 @@ jobs:
 
           unzip -q "$ZIP_FILE" -d "$EXTRACT_DIR"
 
-          PROJECT_DIR="$EXTRACT_DIR/LaTunisieMedicaleIndexer-main"
-
           if [ ! -d "$PROJECT_DIR" ]; then
-            echo "ERROR: Expected directory $PROJECT_DIR was not found."
-            echo "ZIP contents:"
-            find "$EXTRACT_DIR" -maxdepth 3 -print
+            echo "ERROR: Expected project directory not found:"
+            echo "$PROJECT_DIR"
             exit 1
           fi
 
-          # Copy the contents of the project directory into repository root.
+          # Remove workflows from the extracted project.
+          # GITHUB_TOKEN cannot push changes to workflow files.
+          rm -rf "$PROJECT_DIR/.github/workflows"
+
+          # Copy project contents into repository root.
           cp -a "$PROJECT_DIR"/. .
 
-          # Clean up temporary extraction directory and ZIP.
+          # Remove temporary files.
           rm -rf "$EXTRACT_DIR"
           rm -f "$ZIP_FILE"
 
-          echo "Project extracted successfully."
-          echo "Repository contents:"
-          ls -la
+      - name: Show changes
+        run: |
+          echo "Changes:"
+          git status --short
 
       - name: Configure Git
         run: |
@@ -65,10 +67,9 @@ jobs:
 
           if git diff --cached --quiet; then
             echo "No changes to commit."
-            exit 0
+          else
+            git commit -m "Extract project files"
           fi
-
-          git commit -m "Extract project files"
 
       - name: Push changes
         run: |
