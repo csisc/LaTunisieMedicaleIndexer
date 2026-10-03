@@ -24,7 +24,6 @@ View your app in AI Studio: https://ai.studio/apps/bb738cd8-c7f4-4262-a21e-bee80
 
 The two Meta-Wiki tables (Main page 1956–2008, Before 1956) are replaced by one CSV:
 `backend/data/articles.csv` (`source,year,volume,issue,page,rank,url,notes`, 2 130 pending rows; a URL can appear several times because several articles can start on the same page).
-The original parsed pages are kept in `backend/data/seed/`; `backend/scripts/build-csv.py` rebuilds the CSV from them.
 
 - **Landing page** (`#/before_1956`, `#/main_page`): choose the list to process; each card shows the pages still to do.
 - **Automatic clean-up**: `backend/wikidataSync.ts` queries Wikidata (items with *published in* = La Tunisie Médicale
@@ -34,3 +33,12 @@ The original parsed pages are kept in `backend/data/seed/`; `backend/scripts/bui
   (`POST /api/sync`) or `npm run sync` (cron). If Wikidata cannot be reached the CSV is left untouched.
 - **Shortcut**: after creating an item, "Créé · page suivante" removes the page immediately (`POST /api/articles/mark-created`).
 - Tests: `npm test`.
+
+## GitHub deployment
+
+- `.github/workflows/pages.yml` publishes the **frontend** to GitHub Pages (Settings → Pages → Source: *GitHub Actions*).
+  GitHub Pages is static: the Node backend (OCR, archive proxy, Gemini, CSV API) must run on another host. Deploy it there
+  with `ALLOWED_ORIGIN=https://<user>.github.io` and `GEMINI_API_KEY`, then set the repository variable `API_BASE_URL`
+  to its URL.
+- `.github/workflows/sync-csv.yml` runs the Wikidata clean-up every 6 hours and commits the updated CSV. If the backend
+  redeploys from this repository, it picks up the new CSV automatically.

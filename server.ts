@@ -18,6 +18,18 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: '25mb' }));
 
+// The frontend can live on GitHub Pages (another origin): ALLOWED_ORIGIN=https://<user>.github.io
+app.use((req: Request, res: Response, next) => {
+  const allowed = process.env.ALLOWED_ORIGIN;
+  if (allowed && req.headers.origin === allowed) {
+    res.setHeader('Access-Control-Allow-Origin', allowed);
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    if (req.method === 'OPTIONS') return res.sendStatus(204);
+  }
+  next();
+});
+
 // Initialize Gemini Client
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
