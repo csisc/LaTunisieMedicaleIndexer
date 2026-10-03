@@ -1,5 +1,5 @@
-# Removes from backend/data/articles.csv the pages that already exist on Wikidata, commits the result,
-# then triggers a new deployment so the site serves the updated queue.
+# Removes from backend/data/articles.csv the pages that already exist on Wikidata, and commits the result.
+# Works even without any server: the CSV lives in the repository.
 name: Sync work queue with Wikidata
 
 on:

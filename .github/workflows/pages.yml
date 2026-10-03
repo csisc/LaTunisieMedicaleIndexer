@@ -33,6 +33,11 @@ jobs:
         env:
           VITE_BASE: /${{ github.event.repository.name }}/
       - run: cp dist/index.html dist/404.html
+        # SPA fallback: deep links such as /<repo>/#/before_1956 keep working after a reload
+      - name: Check the built site
+        run: npm run verify-dist
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
