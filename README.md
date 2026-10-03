@@ -1,44 +1,36 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# La Tunisie Médicale — outil d'indexation Wikidata
 
-# Run and deploy your AI Studio app
+Application **100 % statique** : elle tourne sur GitHub Pages, sans serveur ni service tiers (pas de CDN, pas de clé d'API).
 
-This contains everything you need to run your app locally.
+- **OCR Tesseract dans le navigateur** : le moteur (worker + wasm) et le modèle français sont servis par le site lui-même (`/ocr/`).
+- **Extraction des métadonnées** : analyseur à règles (`src/utils/offlineParser.ts`), formule de la page de fin du projet, export QuickStatements.
+- **File de travail** : `backend/data/articles.csv`, publié avec le site. Recherche, filtres et navigation fonctionnent sans serveur.
+- **Synchronisation Wikidata** : bouton *Synchroniser* (requête directe du navigateur à Wikidata) + action GitHub planifiée toutes les 6 h qui met à jour le CSV du dépôt.
 
-View your app in AI Studio: https://ai.studio/apps/bb738cd8-c7f4-4262-a21e-bee8089964f1
+## Déploiement
 
-## Run Locally
+1. *Settings → Pages → Source : GitHub Actions*.
+2. Poussez sur `main` : `.github/workflows/pages.yml` construit et publie le site.
+3. L'action `sync-csv.yml` retire du CSV les pages déjà sur Wikidata, commite, puis redéclenche le déploiement.
 
-**Prerequisites:**  Node.js
+## Comment ça marche sans serveur
 
+| Besoin | Solution statique |
+|---|---|
+| OCR | `tesseract.js` dans le navigateur, assets locaux (`scripts/prepare-assets.mjs` les copie dans `public/ocr/`) |
+| Trouver l'image d'une page | `public/archive-index.json` (volume → liste des images), généré par `scripts/build-archive-index.mjs` pendant le build |
+| File d'attente | `articles.csv` + `created_log.csv` copiés dans le site ; les « Créé · page suivante » sont mémorisés dans le `localStorage` du navigateur |
+| Recherche d'auteurs / sujets | API Wikidata appelée directement (`origin=*`) |
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Limite à connaître
 
+Le navigateur peut afficher le scan des Archives nationales, mais ne peut le **lire** pour l'OCR que si leur serveur envoie des en-têtes CORS. Si ce n'est pas le cas, l'application le dit et propose l'import du scan : bouton *Scan image*, glisser-déposer ou collage (Ctrl+V) ; l'OCR et le reste fonctionnent alors à l'identique.
 
-## Work queue (CSV) and Wikidata sync
+## Développement local
 
-The two Meta-Wiki tables (Main page 1956–2008, Before 1956) are replaced by one CSV:
-`backend/data/articles.csv` (`source,year,volume,issue,page,rank,url,notes`, 2 130 pending rows; a URL can appear several times because several articles can start on the same page).
-
-- **Landing page** (`#/before_1956`, `#/main_page`): choose the list to process; each card shows the pages still to do.
-- **Automatic clean-up**: `backend/wikidataSync.ts` queries Wikidata (items with *published in* = La Tunisie Médicale
-  and a *full work URL* pointing to `search.archives.nat.tn`), matches them to CSV rows by volume + page
-  (immune to http/https, `%20`, `/mode/2up`), removes those rows (one row per Wikidata item, so a page with 2 articles and 1 item keeps 1 row; QIDs already logged are never counted twice) and appends them to `backend/data/created_log.csv`.
-  It runs at server start, then every `SYNC_INTERVAL_HOURS` (default 6; 0 disables), via the *Synchroniser* button
-  (`POST /api/sync`) or `npm run sync` (cron). If Wikidata cannot be reached the CSV is left untouched.
-- **Shortcut**: after creating an item, "Créé · page suivante" removes the page immediately (`POST /api/articles/mark-created`).
-- Tests: `npm test`.
-
-## GitHub deployment
-
-- `.github/workflows/pages.yml` publishes the **frontend** to GitHub Pages (Settings → Pages → Source: *GitHub Actions*).
-  GitHub Pages is static: the Node backend (OCR, archive proxy, Gemini, CSV API) must run on another host. Deploy it there
-  with `ALLOWED_ORIGIN=https://<user>.github.io` and `GEMINI_API_KEY`, then set the repository variable `API_BASE_URL`
-  to its URL.
-- `.github/workflows/sync-csv.yml` runs the Wikidata clean-up every 6 hours and commits the updated CSV. If the backend
-  redeploys from this repository, it picks up the new CSV automatically.
+```bash
+npm install --legacy-peer-deps
+npm run index-archive   # optionnel : remplit public/archive-index.json (nécessite l'accès aux Archives nationales)
+npm run dev
+npm test                # tests de la synchronisation
+```
