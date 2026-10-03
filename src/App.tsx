@@ -31,7 +31,8 @@ import {
 } from './utils/quickstatements';
 import { LandingPage } from './components/LandingPage';
 import { CollectionQueue } from './components/CollectionQueue';
-import { CollectionId, getNext, markCreated, apiUrl } from './api';
+import { CollectionId, getNext, markCreated } from './api';
+import { processArchiveUrl, processImageFile, ScanNotReadableError } from './lib/pipeline';
 
 const COLLECTION_LABELS: Record<CollectionId, { label: string; wiki: string }> = {
   before_1956: {
@@ -120,71 +121,46 @@ export default function App() {
     }
   };
 
-  // Handle local image file upload
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  // Scan provided by the user (file picker, drag & drop or paste): OCR + parsing run in the browser
+  const handleImageBlob = async (file: Blob) => {
     setIsLoading(true);
     setErrorMessage(null);
     setIsValidated(false);
-    setLoadingStep("1. Chargement de l'image locale...");
-
     try {
-      const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-      });
-      reader.readAsDataURL(file);
-      const base64Data = await base64Promise;
-
-      setScanImageUrl(base64Data);
-      setLoadingStep("2. Exécution de l'OCR Tesseract sur le scan...");
-
-      const ocrResp = await fetch(apiUrl('/api/ocr'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64: base64Data, mimeType: file.type || 'image/jpeg' }),
-      });
-
-      let extractedOcr = '';
-      if (ocrResp.ok) {
-        const ocrData = await ocrResp.json();
-        extractedOcr = ocrData.text || '';
-      }
-
-      setOcrText(extractedOcr);
-      setLoadingStep("3. Traitement sémantique des métadonnées de l'article...");
-
-      const parseResp = await fetch(apiUrl('/api/parse-article'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: extractedOcr,
-          imageBase64: base64Data,
-          mimeType: file.type || 'image/jpeg',
-          hints: { url: file.name },
-        }),
-      });
-
-      if (!parseResp.ok) {
-        throw new Error("Impossible de traiter les métadonnées depuis l'image.");
-      }
-
-      const parseData = await parseResp.json();
-      setMetadata(parseData);
-      setUrlInput(file.name);
+      const r = await processImageFile(file, urlInput.trim(), setLoadingStep);
+      setScanImageUrl(r.imageUrl);
+      setOcrText(r.ocrText);
+      setMetadata(r.metadata);
+      setWikiProjectInfo(r.wikiProjectInfo);
     } catch (err: any) {
-      console.error('File upload process error:', err);
-      setErrorMessage(err.message || "Erreur lors du traitement du fichier.");
+      console.error('Image process error:', err);
+      setErrorMessage(err.message || 'Erreur lors du traitement du scan.');
     } finally {
       setIsLoading(false);
       setLoadingStep('');
     }
   };
 
-  // Process URL handler: executes real OCR, metadata derivation from OCR + Meta-Wiki pages
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (file) await handleImageBlob(file);
+  };
+
+  // Ctrl+V of a screenshot / copied image
+  React.useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const file = Array.from(e.clipboardData?.files || []).find((f) => f.type.startsWith('image/'));
+      if (file) {
+        e.preventDefault();
+        handleImageBlob(file);
+      }
+    };
+    window.addEventListener('paste', onPaste);
+    return () => window.removeEventListener('paste', onPaste);
+  });
+
+  // Archive URL -> scan -> OCR -> metadata (everything in the browser, no server)
   const handleProcessUrl = async (targetUrl?: string) => {
     const urlToProcess = (targetUrl || urlInput).trim();
     if (!urlToProcess) {
@@ -195,32 +171,19 @@ export default function App() {
     setIsLoading(true);
     setErrorMessage(null);
     setIsValidated(false);
-    setLoadingStep("1. Résolution de l'archive et téléchargement de la page numérisée...");
+    setMetadata(null);
+    setScanImageUrl(null);
 
     try {
-      setLoadingStep("2. Exécution de la reconnaissance optique des caractères (OCR Tesseract)...");
-
-      const response = await fetch(apiUrl('/api/resolve-and-ocr'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: urlToProcess }),
-      });
-
-      if (!response.ok) {
-        const errJson = await response.json().catch(() => ({}));
-        throw new Error(errJson.error || "Impossible de récupérer et traiter le scan depuis cette URL.");
-      }
-
-      setLoadingStep("3. Traitement sémantique de l'OCR et croisement avec le projet Meta-Wiki...");
-      const data = await response.json();
-
-      setScanImageUrl(apiUrl(data.proxyImageUrl || '') || data.remoteImageUrl);
-      setOcrText(data.ocrText || '');
-      setMetadata(data.metadata);
-      setWikiProjectInfo(data.wikiProjectInfo || null);
+      const r = await processArchiveUrl(urlToProcess, setLoadingStep, setScanImageUrl);
+      setScanImageUrl(r.imageUrl);
+      setOcrText(r.ocrText);
+      setMetadata(r.metadata);
+      setWikiProjectInfo(r.wikiProjectInfo);
     } catch (err: any) {
       console.error('Process error:', err);
       setErrorMessage(err.message || "Une erreur est survenue lors de l'extraction OCR.");
+      if (!(err instanceof ScanNotReadableError)) setScanImageUrl(null);
     } finally {
       setIsLoading(false);
       setLoadingStep('');
@@ -329,7 +292,17 @@ export default function App() {
       {/* Main Simplified Workflow */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* STEP 1: Enter the URL */}
-        <section className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+        <section
+          className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            const f = Array.from(e.dataTransfer.files).find((x) => x.type.startsWith('image/'));
+            if (f) {
+              e.preventDefault();
+              handleImageBlob(f);
+            }
+          }}
+        >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
@@ -422,7 +395,20 @@ export default function App() {
         {/* Error Notification */}
         {errorMessage && (
           <div className="p-4 rounded-xl bg-rose-950/50 border border-rose-800/60 text-xs sm:text-sm text-rose-200 flex items-center justify-between">
-            <span>{errorMessage}</span>
+            <span>
+              {errorMessage}
+              {scanImageUrl && !metadata && (
+                <a
+                  href={scanImageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  referrerPolicy="no-referrer"
+                  className="ml-2 underline text-sky-300 hover:text-sky-200 whitespace-nowrap"
+                >
+                  Ouvrir le scan
+                </a>
+              )}
+            </span>
             <button onClick={() => setErrorMessage(null)} className="text-rose-400 hover:text-rose-200 font-bold">
               &times;
             </button>
@@ -435,7 +421,7 @@ export default function App() {
             <Loader2 className="w-10 h-10 text-indigo-400 animate-spin mx-auto" />
             <div className="font-semibold text-base text-slate-100">{loadingStep}</div>
             <p className="text-xs text-slate-400 max-w-md mx-auto">
-              Le système interroge directement le serveur des Archives Nationales de Tunisie, télécharge le scan et effectue l'OCR complet.
+              Tout se passe dans votre navigateur : le scan est téléchargé puis analysé localement, sans serveur intermédiaire.
             </p>
           </div>
         )}
@@ -506,6 +492,7 @@ export default function App() {
                     {scanImageUrl ? (
                       <img
                         src={scanImageUrl}
+                        referrerPolicy="no-referrer"
                         alt="Scan original de la page"
                         className="max-h-[480px] object-contain rounded-lg shadow-md"
                       />
