@@ -27,7 +27,7 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: package.json
-      - run: npm install --no-audit --no-fund
+      - run: npm install --no-audit --no-fund --legacy-peer-deps
       - run: npm run build
         env:
           VITE_BASE: /${{ github.event.repository.name }}/
