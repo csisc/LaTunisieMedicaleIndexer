@@ -31,7 +31,7 @@ import {
 } from './utils/quickstatements';
 import { LandingPage } from './components/LandingPage';
 import { CollectionQueue } from './components/CollectionQueue';
-import { CollectionId, getNext, markCreated } from './api';
+import { CollectionId, getNext, markCreated, apiUrl } from './api';
 
 const COLLECTION_LABELS: Record<CollectionId, { label: string; wiki: string }> = {
   before_1956: {
@@ -142,7 +142,7 @@ export default function App() {
       setScanImageUrl(base64Data);
       setLoadingStep("2. Exécution de l'OCR Tesseract sur le scan...");
 
-      const ocrResp = await fetch('/api/ocr', {
+      const ocrResp = await fetch(apiUrl('/api/ocr'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageBase64: base64Data, mimeType: file.type || 'image/jpeg' }),
@@ -157,7 +157,7 @@ export default function App() {
       setOcrText(extractedOcr);
       setLoadingStep("3. Traitement sémantique des métadonnées de l'article...");
 
-      const parseResp = await fetch('/api/parse-article', {
+      const parseResp = await fetch(apiUrl('/api/parse-article'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -200,7 +200,7 @@ export default function App() {
     try {
       setLoadingStep("2. Exécution de la reconnaissance optique des caractères (OCR Tesseract)...");
 
-      const response = await fetch('/api/resolve-and-ocr', {
+      const response = await fetch(apiUrl('/api/resolve-and-ocr'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: urlToProcess }),
@@ -214,7 +214,7 @@ export default function App() {
       setLoadingStep("3. Traitement sémantique de l'OCR et croisement avec le projet Meta-Wiki...");
       const data = await response.json();
 
-      setScanImageUrl(data.proxyImageUrl || data.remoteImageUrl);
+      setScanImageUrl(apiUrl(data.proxyImageUrl || '') || data.remoteImageUrl);
       setOcrText(data.ocrText || '');
       setMetadata(data.metadata);
       setWikiProjectInfo(data.wikiProjectInfo || null);
