@@ -1,0 +1,51 @@
+# OCRs the scans of the work queue on GitHub's servers (browsers cannot read the archive's images: no CORS header).
+# Results are committed as text files (public/ocr-text/<volume>/<page>.txt) and published with the site.
+# Each run works for up to ~5 hours, then re-launches itself until the whole queue is covered.
+name: OCR batch
+
+on:
+  schedule:
+    - cron: '43 3 * * *' # safety net: resumes if the chain was ever interrupted
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+# never run together with the other jobs that commit to the repository
+concurrency:
+  group: repo-data
+  cancel-in-progress: false
+
+jobs:
+  ocr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund --legacy-peer-deps
+      - name: Collect the page lists of the volumes
+        run: npm run index-archive
+        continue-on-error: true
+      - name: OCR
+        id: ocr
+        run: node scripts/ocr-batch.mjs
+        env:
+          MAX_MINUTES: '300'
+          WORKERS: '3'
+      - name: Commit results
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add public/ocr-text public/archive-index.json
+          if git diff --cached --quiet; then echo "Nothing new"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "OCR batch: ${{ steps.ocr.outputs.done }} page(s)"
+          for i in 1 2 3; do git pull --rebase -X theirs && git push && break; sleep 5; done
+          # pushes made with GITHUB_TOKEN do not trigger other workflows: redeploy the site explicitly
+          gh workflow run pages.yml --ref "${GITHUB_REF_NAME}"
